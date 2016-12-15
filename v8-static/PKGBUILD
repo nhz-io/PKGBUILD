@@ -1,0 +1,57 @@
+pkgname=v8-static
+pkgver=5.7.240
+pkgrel=1
+pkgdesc='V8 static libs v5.7.240'
+arch=(x86_64)
+license=(MIT)
+
+url='https://github.com/nhz-io/v8-static.pkg'
+
+source=('depot_tools::git+https://chromium.googlesource.com/chromium/tools/depot_tools.git'
+        'BUILD.gn.patch')
+
+sha256sums=('SKIP'
+            'SKIP')
+
+prepare() {
+    export DEPOT_TOOLS_UPDATE=0
+    export PATH="$(pwd)/depot_tools:$PATH"
+
+    if [ ! -d v8 ]; then
+        echo Fetching V8
+        gclient config https://github.com/v8/v8
+        gclient sync --shallow --no-history -r 285b9f5a26decb9cc11e14e2101ed707a321b542
+    fi
+
+    cd v8
+    git apply ../BUILD.gn.patch
+    cd ..
+    
+    if [ ! -d v8/out.gn/x64.Release ]; then
+        echo Configuring Ninja
+        cd v8
+        gn gen out.gn/x64.Release -vv --fail-on-unused-args --args='
+            is_debug=false
+            is_official_build=false
+            is_chrome_branded=false
+            is_clang=false
+            use_sysroot=false
+            clang_base_path="/usr"
+            is_component_build=false
+            v8_enable_i18n_support=false
+            symbol_level=0
+            enable_nacl=false
+            v8_use_external_startup_data=false'
+    fi
+}
+
+build() {
+    echo Building V8
+    export PATH="$(pwd)/depot_tools:$PATH"
+    cd v8
+    ninja -C out.gn/x64.Release
+}
+
+package() {
+    echo FOO
+}
