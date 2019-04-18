@@ -1,0 +1,37 @@
+pkgname=kubefed
+pkgver=v1.9.0
+pkgrel=3
+pkgdesc='Kubernetes Federation'
+arch=(x86_64)
+license=('Apache-2.0v')
+
+url='https://github.com/kubernetes/federation'
+
+source=('https://github.com/kubernetes/federation/archive/v1.10.0-alpha.0.tar.gz'
+        'https://raw.githubusercontent.com/clearlinux-pkgs/kubernetes/724a51af37ec57615cf5c2f77392b4919fe5888c/build.patch')
+
+sha256sums=('263cd4827aaf30d00111ae2a13c7591c60263e1ff59c11c4c744a32014ade361'
+            'SKIP')
+
+makedepends=('git'
+             'go')
+
+prepare() {
+    cd federation-1.10.0-alpha.0
+    git apply ../build.patch
+}
+
+build() {
+    cd federation-1.10.0-alpha.0
+    make
+}
+
+package() {
+    cp federation-1.10.0-alpha.0/_output/local/go/bin/kubefed /usr/bin
+    chmod +x /usr/bin/kubefed
+}
+
+
+package() {
+    install -Dm755 federation-1.10.0-alpha.0/_output/local/go/bin/kubefed "$pkgdir/usr/bin/kubefed"
+}
