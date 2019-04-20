@@ -1,0 +1,26 @@
+pkgname=terraform
+pkgver=v0.12.0
+pkgrel=2
+pkgdesc='Hashicorp Terraform'
+arch=(x86_64)
+license=('MPL-2.0')
+
+url='https://github.com/hashicorp/terraform'
+
+source=('https://github.com/hashicorp/terraform/archive/v0.12.0-beta2.tar.gz')
+
+sha256sums=('413714ea0a82ecff3324a0f9f414d9a13898987baf066864b8a5462235ac315e')
+
+makedepends=('docker')
+
+build() {
+    docker run --rm -v $(pwd)/terraform-0.12.0-beta2:/go/src/github.com/hashicorp/terraform \
+    	-e XC_OS=linux \
+    	-e XC_ARCH=amd64 \
+    	golang:latest \
+    	bash -c "apt-get update && apt-get install -y zip && cd /go/src/github.com/hashicorp/terraform && make bin"
+}
+
+package() {
+    install -Dm755 terraform-0.12.0-beta2/bin/terraform "$pkgdir/usr/bin/terraform"
+}
